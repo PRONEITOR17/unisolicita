@@ -1,0 +1,40 @@
+<%- include('../partials/header') %>
+<div class="contenedor pagina">
+  <div class="pagina-cabecera"><div><span class="etiqueta-pill oscura">Administración</span><h1>Categorías</h1></div></div>
+  <%- include('../partials/ayuda-pagina', { pagina: 'categorias' }) %>
+  <div class="grid-detalle">
+    <div class="tarjeta">
+      <h2>Categorías de solicitud</h2>
+      <div class="tabla-caja">
+        <table class="tabla">
+          <thead><tr><th>Nombre</th><th>Descripción</th><th>Estado</th><th></th></tr></thead>
+          <tbody>
+          <% categorias.forEach((c) => { %>
+            <tr>
+              <td colspan="4">
+                <form method="post" action="/categorias/<%= c.id %>" class="fila-categoria">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                  <input type="text" name="nombre" value="<%= c.nombre %>" required maxlength="80" aria-label="Nombre">
+                  <input type="text" name="descripcion" value="<%= c.descripcion || '' %>" maxlength="255" aria-label="Descripción">
+                  <span class="badge <%= c.activa ? 'estado-resuelta' : 'inactivo' %>"><%= c.activa ? 'Activa' : 'Inactiva' %></span>
+                  <button class="btn btn-borde btn-sm" type="submit">Guardar</button>
+                  <button class="btn btn-sm <%= c.activa ? 'btn-peligro' : 'btn-verde' %>" type="submit" formaction="/categorias/<%= c.id %>/activa" name="activa" value="<%= c.activa ? 'false' : 'true' %>"><%= c.activa ? 'Desactivar' : 'Activar' %></button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <form class="tarjeta" method="post" action="/categorias">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <h2>Nueva categoría</h2>
+      <div class="campo"><label for="nombre">Nombre</label><input type="text" id="nombre" name="nombre" required maxlength="80"></div>
+      <div class="campo"><label for="descripcion">Descripción</label><input type="text" id="descripcion" name="descripcion" maxlength="255"></div>
+      <button class="btn btn-oro" type="submit"><%- icono('plus') %> Crear categoría</button>
+      <p class="suave margen-sup">Las categorías no se eliminan: se desactivan para conservar el historial.</p>
+    </form>
+  </div>
+</div>
+<%- include('../partials/footer') %>

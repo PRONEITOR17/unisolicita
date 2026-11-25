@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 64" role="img" aria-label="UniSolicita">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1a56d6"/>
+      <stop offset="1" stop-color="#082a66"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="16" fill="url(#g)"/>
+  <path d="M32 13l4.6 12.4L49 30l-12.4 4.6L32 47l-4.6-12.4L15 30l12.4-4.6z" fill="#f6b61c"/>
+  <circle cx="32" cy="30" r="4.2" fill="#082a66"/>
+  <text x="72" y="40" font-family="'Open Sans','Segoe UI',Roboto,Arial,sans-serif" font-size="30" font-weight="800" fill="#082a66">Uni<tspan fill="#1a56d6">Solicita</tspan></text>
+  <text x="73" y="55" font-family="'Open Sans','Segoe UI',Roboto,Arial,sans-serif" font-size="9.5" font-weight="600" letter-spacing="1.6" fill="#6b7a99">SERVICIOS Y SOLICITUDES</text>
+</svg>

@@ -1,0 +1,105 @@
+<%- include('../partials/header') %>
+<%
+  const s = solicitud;
+  const hayAcciones = acciones.length || puedeAsignar || puedeObservar;
+  const ROTULO_TIPO = { ESTADO: 'Cambio de estado', ASIGNACION: 'Asignación', OBSERVACION: 'Observación' };
+  const ESTILO_BOTON = { RECHAZADA: 'btn-peligro', RESUELTA: 'btn-verde', REABIERTA: 'btn-borde' };
+%>
+<div class="contenedor pagina">
+  <div class="pagina-cabecera">
+    <div>
+      <span class="etiqueta-pill oscura">Solicitud</span>
+      <h1><%= s.codigo %></h1>
+    </div>
+    <div><span class="badge <%= claseEstado(s.estado.nombre) %>"><%= s.estado.etiqueta %></span>
+      <a class="btn btn-borde btn-sm" href="/solicitudes">← Volver</a></div>
+  </div>
+
+  <%- include('../partials/ayuda-pagina', { pagina: 'detalle' }) %>
+  <% const queHacer = ayudaEstado(usuario.rol, s.estado.nombre); %>
+  <div class="grid-detalle">
+    <div>
+      <% if (queHacer) { %>
+      <div class="ayuda-estado" role="note">
+        <strong><%- icono('ayuda') %> Estado: <%= s.estado.etiqueta %></strong>
+        <p><%= queHacer %></p>
+      </div>
+      <% } %>
+      <div class="tarjeta">
+        <dl class="datos">
+          <div><dt>Registrada</dt><dd><%= fechaHora(s.fechaRegistro) %></dd></div>
+          <div><dt>Solicitante</dt><dd><%= s.solicitante %></dd></div>
+          <div><dt>Categoría</dt><dd><%= s.categoria %></dd></div>
+          <div><dt>Prioridad</dt><dd><span class="badge <%= clasePrioridad(s.prioridad) %>"><%= etiquetaPrioridad(s.prioridad) %></span></dd></div>
+          <div><dt>Responsable</dt><dd><%= s.responsable || 'Sin asignar' %></dd></div>
+        </dl>
+        <h3>Descripción</h3>
+        <div class="bloque-texto"><%= s.descripcion %></div>
+        <% if (s.solucion) { %>
+          <h3 class="margen-sup">Solución</h3>
+          <div class="bloque-texto bloque-solucion"><%= s.solucion %></div>
+        <% } %>
+      </div>
+
+      <% if (hayAcciones) { %>
+      <div class="tarjeta">
+        <h2>Acciones</h2>
+        <% if (puedeAsignar) { %>
+        <form method="post" action="/solicitudes/<%= s.id %>/asignar">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <h3><%= s.responsable ? 'Reasignar responsable' : 'Asignar responsable' %></h3>
+          <div class="fila-campos">
+            <div class="campo"><label for="responsable">Funcionario</label>
+              <select id="responsable" name="responsable" required>
+                <option value="">Selecciona…</option>
+                <% funcionarios.forEach((f) => { %><option value="<%= f.id %>" <%= s.idResponsable === f.id ? 'selected' : '' %>><%= f.nombre %></option><% }) %>
+              </select></div>
+            <div class="campo"><label for="obs-asignar">Nota (opcional)</label><input type="text" id="obs-asignar" name="observacion" maxlength="500"></div>
+          </div>
+          <button class="btn" type="submit"><%- icono('users') %> <%= s.responsable ? 'Reasignar' : 'Asignar' %></button>
+        </form>
+        <% } %>
+
+        <% if (puedeObservar) { %>
+        <form method="post" action="/solicitudes/<%= s.id %>/observaciones" class="acciones-caja">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <h3>Agregar observación</h3>
+          <div class="campo"><label for="obs">Observación para el historial</label><textarea id="obs" name="texto" required maxlength="2000"></textarea></div>
+          <button class="btn btn-borde" type="submit">Guardar observación</button>
+        </form>
+        <% } %>
+
+        <% acciones.forEach((t) => { %>
+        <form method="post" action="/solicitudes/<%= s.id %>/estado" class="acciones-caja" <%- t.hacia === 'RECHAZADA' ? 'data-confirmar="¿Rechazar esta solicitud? Es un estado final."' : '' %>>
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="estado" value="<%= t.hacia %>">
+          <% if (t.campo) { %>
+            <div class="campo"><label for="texto-<%= t.hacia %>"><%= t.etiquetaCampo %></label>
+              <textarea id="texto-<%= t.hacia %>" name="texto" required maxlength="2000"></textarea></div>
+          <% } %>
+          <button class="btn <%= ESTILO_BOTON[t.hacia] || '' %>" type="submit"><%= t.etiqueta %></button>
+        </form>
+        <% }) %>
+      </div>
+      <% } %>
+    </div>
+
+    <aside class="tarjeta">
+      <h2>Historial</h2>
+      <ol class="linea-tiempo">
+        <% movimientos.forEach((m) => { %>
+        <li>
+          <span class="punto <%= m.tipo.toLowerCase() %>"></span>
+          <div class="cuando"><%= fechaHora(m.fecha) %> · <%= ROTULO_TIPO[m.tipo] %></div>
+          <div class="quien"><%= m.usuario %> <span class="suave">(<%= etiquetaRol(m.rolUsuario) %>)</span></div>
+          <% if (m.tipo !== 'OBSERVACION' && m.estadoAnterior !== m.estadoNuevo) { %>
+            <div><% if (m.estadoAnterior) { %><span class="badge <%= claseEstado(m.estadoAnterior) %>"><%= etiquetaEstado(m.estadoAnterior) %></span> → <% } %><span class="badge <%= claseEstado(m.estadoNuevo) %>"><%= etiquetaEstado(m.estadoNuevo) %></span></div>
+          <% } %>
+          <% if (m.observacion) { %><p class="texto"><%= m.observacion %></p><% } %>
+        </li>
+        <% }) %>
+      </ol>
+    </aside>
+  </div>
+</div>
+<%- include('../partials/footer') %>

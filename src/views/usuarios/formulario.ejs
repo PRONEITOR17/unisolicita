@@ -1,0 +1,23 @@
+<%- include('../partials/header') %>
+<div class="contenedor pagina">
+  <div class="pagina-cabecera">
+    <div><span class="etiqueta-pill oscura">Administración</span><h1><%= usuarioEditado ? 'Editar usuario' : 'Nuevo usuario' %></h1></div>
+    <a class="btn btn-borde" href="/usuarios">Cancelar</a>
+  </div>
+  <%- include('../partials/ayuda-pagina', { pagina: 'usuario-formulario' }) %>
+  <form class="tarjeta formulario-estrecho" method="post" action="<%= usuarioEditado ? '/usuarios/' + usuarioEditado.id : '/usuarios' %>" novalidate>
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <% if (error) { %><div class="aviso aviso-error" role="alert"><%= error %></div><% } %>
+    <div class="campo"><label for="nombre">Nombre completo</label><input type="text" id="nombre" name="nombre" value="<%= valores.nombre %>" required maxlength="120"></div>
+    <div class="campo"><label for="correo">Correo</label><input type="email" id="correo" name="correo" value="<%= valores.correo %>" required></div>
+    <div class="campo"><label for="rol">Rol</label>
+      <select id="rol" name="rol" required>
+        <% roles.forEach((r) => { %><option value="<%= r.nombre %>" <%= valores.rol === r.nombre ? 'selected' : '' %>><%= etiquetaRol(r.nombre) %></option><% }) %>
+      </select></div>
+    <div class="campo"><label for="contrasena"><%= usuarioEditado ? 'Nueva contraseña (opcional)' : 'Contraseña' %></label>
+      <input type="password" id="contrasena" name="contrasena" autocomplete="new-password" <%= usuarioEditado ? '' : 'required' %>>
+      <small>Mínimo 8 caracteres, con letras y números.<%= usuarioEditado ? ' Déjala vacía para conservar la actual.' : '' %></small></div>
+    <div class="botonera"><button class="btn btn-oro" type="submit"><%- icono('check') %> Guardar</button></div>
+  </form>
+</div>
+<%- include('../partials/footer') %>

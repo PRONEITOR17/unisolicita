@@ -1,0 +1,83 @@
+<%- include('partials/header') %>
+<div class="contenedor pagina">
+  <div class="pagina-cabecera">
+    <div>
+      <span class="etiqueta-pill oscura">Guía de uso</span>
+      <h1>Ayuda para <%= esPropia ? 'tu rol' : 'el rol' %>: <%= guia.nombre %></h1>
+    </div>
+    <% if (esPropia) { %><a class="btn btn-oro" href="/panel?guia=1"><%- icono('ayuda') %> Repetir el recorrido guiado</a><% } %>
+  </div>
+
+  <nav class="pestanas-rol" aria-label="Guía por rol">
+    <span class="suave">Ver la guía de:</span>
+    <% roles.forEach((r) => { %>
+      <a href="/ayuda?rol=<%= r %>" class="<%= r === rolVista ? 'activa' : '' %>"><%= etiquetaRol(r) %><%= r === usuario.rol ? ' (tú)' : '' %></a>
+    <% }) %>
+  </nav>
+
+  <div class="tarjeta">
+    <h2>En una frase</h2>
+    <p class="lead"><%= guia.resumen %></p>
+  </div>
+
+  <div class="dos-columnas">
+    <div class="tarjeta">
+      <h2>Qué puedes hacer</h2>
+      <ul class="guia-lista si">
+        <% guia.puedes.forEach((t) => { %><li><%- icono('check') %><span><%= t %></span></li><% }) %>
+      </ul>
+    </div>
+    <div class="tarjeta">
+      <h2>Qué no puedes hacer</h2>
+      <ul class="guia-lista no">
+        <% guia.noPuedes.forEach((t) => { %><li><%- icono('x') %><span><%= t %></span></li><% }) %>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Paso a paso</h2>
+  <% guia.tareas.forEach((tarea) => { %>
+  <div class="tarjeta">
+    <h3><%= tarea.titulo %></h3>
+    <ol class="guia-pasos">
+      <% tarea.pasos.forEach((p) => { %><li><%= p %></li><% }) %>
+    </ol>
+  </div>
+  <% }) %>
+
+  <h2>Los estados de una solicitud</h2>
+  <div class="tarjeta">
+    <p class="suave">Toda solicitud avanza por estos estados. Cada cambio queda en el historial con quién lo hizo y cuándo, y no se puede alterar.</p>
+    <div class="tabla-caja">
+      <table class="tabla">
+        <thead><tr><th>Estado</th><th>Qué significa</th><th>Quién actúa</th><th>Qué sigue</th></tr></thead>
+        <tbody>
+          <% estados.forEach((e) => { %>
+          <tr>
+            <td><span class="badge <%= claseEstado(e.nombre) %>"><%= etiquetaEstado(e.nombre) %></span></td>
+            <td><%= e.significa %></td>
+            <td><%= e.actua %></td>
+            <td><%= e.sigue %></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h2>Preguntas frecuentes</h2>
+  <div class="tarjeta faq">
+    <% guia.faq.forEach(([pregunta, respuesta]) => { %>
+    <details>
+      <summary><%= pregunta %></summary>
+      <p><%= respuesta %></p>
+    </details>
+    <% }) %>
+  </div>
+
+  <div class="tarjeta tarjeta-oscura">
+    <h3>¿Sigues con dudas?</h3>
+    <p>Escríbenos a <a href="mailto:<%= soporteCorreo %>"><%= soporteCorreo %></a> y te ayudamos.</p>
+  </div>
+</div>
+<%- include('partials/footer') %>

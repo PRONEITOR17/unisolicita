@@ -1,0 +1,47 @@
+<%- include('../partials/header') %>
+<div class="contenedor pagina">
+  <div class="pagina-cabecera">
+    <div>
+      <span class="etiqueta-pill oscura">Nuevo trámite</span>
+      <h1>Registrar solicitud</h1>
+    </div>
+    <a class="btn btn-borde" href="/solicitudes">Cancelar</a>
+  </div>
+  <%- include('../partials/ayuda-pagina', { pagina: 'nueva' }) %>
+  <div class="grid-detalle">
+    <form class="tarjeta" method="post" action="/solicitudes" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <% if (error) { %><div class="aviso aviso-error" role="alert"><%= error %></div><% } %>
+      <div class="campo">
+        <label for="categoria">Categoría</label>
+        <select id="categoria" name="categoria" required>
+          <option value="">Selecciona una categoría…</option>
+          <% categorias.forEach((c) => { %><option value="<%= c.id %>" <%= String(valores.categoria) === String(c.id) ? 'selected' : '' %>><%= c.nombre %></option><% }) %>
+        </select>
+      </div>
+      <div class="campo">
+        <label>Prioridad</label>
+        <div class="opciones-prioridad">
+          <% [['BAJA', 'Baja'], ['MEDIA', 'Media'], ['ALTA', 'Alta']].forEach(([v, t]) => { %>
+            <label><input type="radio" name="prioridad" value="<%= v %>" <%= valores.prioridad === v ? 'checked' : '' %>> <%= t %></label>
+          <% }) %>
+        </div>
+      </div>
+      <div class="campo">
+        <label for="descripcion">Descripción de la solicitud</label>
+        <textarea id="descripcion" name="descripcion" required maxlength="2000" placeholder="Cuéntanos qué necesitas, con el mayor detalle posible."><%= valores.descripcion %></textarea>
+        <small>Mínimo 10 caracteres. Máximo 2000.</small>
+      </div>
+      <div class="botonera">
+        <button class="btn btn-oro" type="submit"><%- icono('check') %> Registrar solicitud</button>
+      </div>
+    </form>
+    <aside class="tarjeta tarjeta-oscura">
+      <h3>¿Qué pasa después?</h3>
+      <p>Tu solicitud queda en estado <strong>Registrada</strong> y un administrador la asigna a un funcionario.</p>
+      <p>Recibirás una notificación cada vez que cambie de estado: asignada, en proceso, resuelta o cerrada.</p>
+      <p>Si la solución no te sirve, el administrador puede reabrirla.</p>
+    </aside>
+  </div>
+</div>
+<%- include('../partials/footer') %>

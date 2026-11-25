@@ -1,0 +1,56 @@
+<%
+  const u = locals.usuario || null;
+  const actual = locals.ruta || '';
+  const MENUS = {
+    ESTUDIANTE: [['/panel', 'Inicio'], ['/solicitudes', 'Mis solicitudes'], ['/solicitudes/nueva', 'Nueva solicitud']],
+    FUNCIONARIO: [['/panel', 'Inicio'], ['/solicitudes', 'Mis asignadas']],
+    ADMINISTRADOR: [['/panel', 'Inicio'], ['/solicitudes', 'Solicitudes'], ['/usuarios', 'Usuarios'], ['/categorias', 'Categorías'], ['/reportes', 'Reportes']],
+    SUPERVISOR: [['/panel', 'Inicio'], ['/solicitudes', 'Solicitudes'], ['/reportes', 'Reportes']],
+  };
+  const items = u ? MENUS[u.rol] || [] : [];
+%><!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= locals.titulo ? locals.titulo + ' · ' : '' %>UniSolicita</title>
+  <meta name="theme-color" content="#0b2a63">
+  <link rel="icon" type="image/png" href="/img/favicon.png">
+  <link rel="apple-touch-icon" href="/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div class="franja"></div>
+<% if (u) { %>
+<header class="cabecera">
+  <div class="contenedor">
+    <a class="logo" href="/panel" aria-label="UniSolicita, ir al inicio">
+      <img class="escudo" src="/img/cul-escudo.jpg" width="52" height="52" alt="Escudo de la CUL">
+      <span class="marca"><strong>Uni<em>Solicita</em></strong><small>Servicios y solicitudes</small></span>
+    </a>
+    <nav class="menu" aria-label="Menú principal">
+      <% items.forEach(([href, texto]) => { %>
+        <a href="<%= href %>" class="<%= actual === href ? 'activo' : '' %>"><%= texto %></a>
+      <% }) %>
+      <a href="/ayuda" class="<%= actual === '/ayuda' ? 'activo' : '' %>">Ayuda</a>
+      <a href="/notificaciones" class="<%= actual === '/notificaciones' ? 'activo' : '' %>">Avisos<% if (locals.noLeidas > 0) { %> <span class="insignia"><%= noLeidas %></span><% } %></a>
+    </nav>
+    <div class="sesion">
+      <a class="perfil" href="/cuenta" title="Mi cuenta" aria-label="Mi cuenta">
+        <span class="avatar" aria-hidden="true"><%= iniciales(u.nombre) %></span>
+        <div class="quien"><strong><%= u.nombre %></strong><span><%= etiquetaRol(u.rol) %></span></div>
+      </a>
+      <form method="post" action="/logout">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-borde btn-sm" type="submit"><%- icono('salir') %> Salir</button>
+      </form>
+    </div>
+  </div>
+</header>
+<% } %>
+<% if (locals.flash) { %>
+<div class="contenedor mensajes" role="status">
+  <div class="aviso aviso-<%= flash.tipo %>"><%= flash.mensaje %></div>
+</div>
+<% } %>
+<main>

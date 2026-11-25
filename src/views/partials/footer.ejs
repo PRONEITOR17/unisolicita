@@ -1,0 +1,28 @@
+</main>
+<% if (locals.usuario) { %>
+<div class="flotantes">
+  <a class="fab fab-naranja" href="/notificaciones" title="Notificaciones" aria-label="Notificaciones">
+    <%- icono('bell') %><% if (locals.noLeidas > 0) { %><span class="insignia"><%= noLeidas %></span><% } %>
+  </a>
+  <a class="fab fab-verde" href="/ayuda" title="Ayuda: guía de uso" aria-label="Ayuda: guía de uso"><%- icono('ayuda') %></a>
+  <button class="fab-mini" type="button" id="avisos-sonido" data-clave="unisolicita-sonido-<%= usuario.id %>" aria-pressed="true" title="Sonido de los avisos" aria-label="Sonido de los avisos">
+    <span class="ico-on"><%- icono('volumen') %></span><span class="ico-off"><%- icono('silencio') %></span>
+  </button>
+</div>
+<div id="guia-datos" hidden data-clave="unisolicita-guia-<%= usuario.id %>" data-pasos="<%= JSON.stringify(pasosTour(usuario.rol)) %>"></div>
+<footer class="pie">
+  <div class="contenedor">
+    <div class="pie-marca">
+      <img class="escudo" src="/img/cul-escudo.jpg" width="46" height="46" alt="Escudo de la CUL">
+      <div><strong>UniSolicita</strong> · Corporación Universitaria Latinoamericana<br>Sistema de gestión de servicios y solicitudes universitarias<% if (leyendaPie) { %> · <%= leyendaPie %><% } %></div>
+    </div>
+    <div><a href="/ayuda">Guía de uso</a> · Atención al usuario · <a href="mailto:<%= soporteCorreo %>"><%= soporteCorreo %></a></div>
+  </div>
+</footer>
+<% } %>
+<button class="subir" type="button" aria-label="Volver arriba"><%- icono('subir') %></button>
+<script src="/js/app.js"></script>
+<% if (locals.usuario) { %><script src="/js/guia.js"></script><script src="/js/avisos.js"></script><% } %>
+<% if (locals.scripts) { locals.scripts.forEach((s) => { %><script src="<%= s %>"></script><% }) } %>
+</body>
+</html>

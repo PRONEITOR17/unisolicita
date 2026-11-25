@@ -1,0 +1,30 @@
+<%- include('partials/header') %>
+<div class="contenedor pagina">
+  <div class="pagina-cabecera">
+    <div><span class="etiqueta-pill oscura">Avisos</span><h1>Notificaciones</h1></div>
+    <% if (notificaciones.some((n) => !n.leida)) { %>
+    <form method="post" action="/notificaciones/leer-todas"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-borde" type="submit"><%- icono('check') %> Marcar todas como leídas</button></form>
+    <% } %>
+  </div>
+  <%- include('partials/ayuda-pagina', { pagina: 'notificaciones' }) %>
+  <div class="tarjeta">
+    <% if (!notificaciones.length) { %>
+      <div class="vacio"><%- icono('bell') %>No tienes notificaciones todavía.</div>
+    <% } else { %>
+    <ul class="lista-notif">
+      <% notificaciones.forEach((n) => { %>
+      <li class="notif <%= n.leida ? 'leida' : '' %>">
+        <span class="punta" aria-hidden="true"></span>
+        <div class="cuerpo"><strong><%= n.codigo %></strong> · <%= n.mensaje %><br><small class="suave"><%= fechaHora(n.fecha) %></small></div>
+        <form method="post" action="/notificaciones/<%= n.id %>/leer">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <input type="hidden" name="solicitud" value="<%= n.idSolicitud %>">
+          <button class="btn btn-borde btn-sm" type="submit">Ver solicitud</button>
+        </form>
+      </li>
+      <% }) %>
+    </ul>
+    <% } %>
+  </div>
+</div>
+<%- include('partials/footer') %>

@@ -1,0 +1,82 @@
+<%- include('partials/header') %>
+<%
+  const ESTADOS = [['REGISTRADA', 'Registrada'], ['ASIGNADA', 'Asignada'], ['EN_PROCESO', 'En proceso'], ['RESUELTA', 'Resuelta'], ['CERRADA', 'Cerrada'], ['REABIERTA', 'Reabierta'], ['RECHAZADA', 'Rechazada']];
+  const datos = { estado: reporte.porEstado, categoria: reporte.porCategoria, prioridad: reporte.porPrioridad };
+  const maximo = (lista) => Math.max(1, ...lista.map((f) => f.total));
+%>
+<div class="contenedor pagina">
+  <div class="pagina-cabecera">
+    <div><span class="etiqueta-pill oscura">Indicadores</span><h1>Reportes</h1></div>
+    <a class="btn btn-borde" href="/reportes/exportar.csv<%= consulta ? '?' + consulta : '' %>"><%- icono('descargar') %> Exportar CSV</a>
+  </div>
+  <%- include('partials/ayuda-pagina', { pagina: 'reportes' }) %>
+
+  <div class="tarjeta">
+    <form method="get" action="/reportes" class="filtros">
+      <div class="campo"><label for="desde">Desde</label><input type="date" id="desde" name="desde" value="<%= q.desde || '' %>"></div>
+      <div class="campo"><label for="hasta">Hasta</label><input type="date" id="hasta" name="hasta" value="<%= q.hasta || '' %>"></div>
+      <div class="campo"><label for="estado">Estado</label>
+        <select id="estado" name="estado"><option value="">Todos</option>
+          <% ESTADOS.forEach(([v, t]) => { %><option value="<%= v %>" <%= q.estado === v ? 'selected' : '' %>><%= t %></option><% }) %>
+        </select></div>
+      <div class="campo"><label for="categoria">Categoría</label>
+        <select id="categoria" name="categoria"><option value="">Todas</option>
+          <% categorias.forEach((c) => { %><option value="<%= c.id %>" <%= String(q.categoria) === String(c.id) ? 'selected' : '' %>><%= c.nombre %></option><% }) %>
+        </select></div>
+      <div class="campo"><label for="responsable">Responsable</label>
+        <select id="responsable" name="responsable"><option value="">Todos</option>
+          <option value="sin" <%= q.responsable === 'sin' ? 'selected' : '' %>>Sin asignar</option>
+          <% funcionarios.forEach((f) => { %><option value="<%= f.id %>" <%= String(q.responsable) === String(f.id) ? 'selected' : '' %>><%= f.nombre %></option><% }) %>
+        </select></div>
+      <div class="botones"><button class="btn btn-sm" type="submit"><%- icono('buscar') %> Generar</button><a class="btn btn-borde btn-sm" href="/reportes">Limpiar</a></div>
+    </form>
+  </div>
+
+  <div class="contadores">
+    <div class="contador" data-color="#1250d0"><strong><%= reporte.total %></strong><span>Solicitudes en el periodo</span></div>
+    <div class="contador" data-color="#17b862"><strong><%= reporte.horasPromedioResolucion === null ? '—' : reporte.horasPromedioResolucion.toFixed(1) %></strong><span>Horas promedio de resolución</span></div>
+  </div>
+
+  <div class="graficas">
+    <div class="tarjeta"><h2>Por estado</h2><div class="grafica-caja"><canvas id="g-estado" aria-label="Solicitudes por estado" role="img"></canvas></div></div>
+    <div class="tarjeta"><h2>Por categoría</h2><div class="grafica-caja"><canvas id="g-categoria" aria-label="Solicitudes por categoría" role="img"></canvas></div></div>
+    <div class="tarjeta"><h2>Por prioridad</h2><div class="grafica-caja"><canvas id="g-prioridad" aria-label="Solicitudes por prioridad" role="img"></canvas></div></div>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Carga por responsable</h2>
+    <% if (!reporte.porResponsable.length) { %><div class="vacio">No hay datos para el periodo.</div><% } else { %>
+    <table class="tabla">
+      <thead><tr><th>Responsable</th><th class="num">Solicitudes</th><th>Participación</th></tr></thead>
+      <tbody>
+      <% reporte.porResponsable.forEach((f) => { %>
+        <tr><td><%= f.etiqueta %></td><td class="num"><%= f.total %></td>
+          <td><div class="barra"><span data-ancho="<%= Math.round((f.total / maximo(reporte.porResponsable)) * 100) %>"></span></div></td></tr>
+      <% }) %>
+      </tbody>
+    </table>
+    <% } %>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Detalle <span class="suave ligero">· <%= reporte.filas.length %> registro<%= reporte.filas.length === 1 ? '' : 's' %> (máx. 100)</span></h2>
+    <% if (!reporte.filas.length) { %><div class="vacio">No hay solicitudes en el periodo seleccionado.</div><% } else { %>
+    <div class="tabla-caja"><table class="tabla">
+      <thead><tr><th>Código</th><th>Fecha</th><th>Solicitante</th><th>Categoría</th><th>Prioridad</th><th>Estado</th><th>Responsable</th></tr></thead>
+      <tbody>
+      <% reporte.filas.forEach((s) => { %>
+        <tr><td class="codigo"><a href="/solicitudes/<%= s.id %>"><%= s.codigo %></a></td><td class="nowrap"><%= fecha(s.fechaRegistro) %></td><td><%= s.solicitante %></td><td><%= s.categoria %></td>
+          <td><span class="badge <%= clasePrioridad(s.prioridad) %>"><%= etiquetaPrioridad(s.prioridad) %></span></td>
+          <td><span class="badge <%= claseEstado(s.estado.nombre) %>"><%= s.estado.etiqueta %></span></td>
+          <td><%= s.responsable || 'Sin asignar' %></td></tr>
+      <% }) %>
+      </tbody></table></div>
+    <% } %>
+  </div>
+</div>
+<script type="application/json" id="datos-reporte"><%- JSON.stringify({
+  estado: datos.estado.map((f) => ({ clave: f.clave, etiqueta: f.etiqueta, total: f.total })),
+  categoria: datos.categoria.map((f) => ({ etiqueta: f.etiqueta, total: f.total })),
+  prioridad: datos.prioridad.map((f) => ({ clave: f.clave, etiqueta: f.etiqueta, total: f.total })),
+}).replace(/</g, '\\u003c') %></script>
+<%- include('partials/footer', { scripts: ['/vendor/chart.js/chart.umd.js', '/js/reportes.js'] }) %>

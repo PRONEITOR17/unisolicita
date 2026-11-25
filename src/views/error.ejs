@@ -1,0 +1,8 @@
+<%- include('partials/header') %>
+<div class="contenedor error-caja">
+  <div class="codigo-error"><%= status %><em>.</em></div>
+  <h1><%= titulo %></h1>
+  <p class="suave"><%= mensaje %></p>
+  <a class="btn btn-oro" href="<%= locals.usuario ? '/panel' : '/login' %>"><%= locals.usuario ? 'Volver al inicio' : 'Ir a iniciar sesión' %></a>
+</div>
+<%- include('partials/footer') %>

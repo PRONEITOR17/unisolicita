@@ -1,0 +1,75 @@
+<%- include('../partials/header') %>
+<%
+  const rol = usuario.rol;
+  const verFiltroResp = rol === 'ADMINISTRADOR' || rol === 'SUPERVISOR';
+  const ESTADOS = [['REGISTRADA', 'Registrada'], ['ASIGNADA', 'Asignada'], ['EN_PROCESO', 'En proceso'], ['RESUELTA', 'Resuelta'], ['CERRADA', 'Cerrada'], ['REABIERTA', 'Reabierta'], ['RECHAZADA', 'Rechazada']];
+  const hayFiltros = Object.values(q).some((v) => typeof v === 'string' && v);
+%>
+<div class="contenedor pagina">
+  <div class="pagina-cabecera">
+    <div>
+      <span class="etiqueta-pill oscura">Seguimiento</span>
+      <h1><%= rol === 'ESTUDIANTE' ? 'Mis solicitudes' : rol === 'FUNCIONARIO' ? 'Solicitudes asignadas' : 'Solicitudes' %></h1>
+    </div>
+    <% if (rol === 'ESTUDIANTE') { %><a class="btn btn-oro" href="/solicitudes/nueva"><%- icono('plus') %> Nueva solicitud</a><% } %>
+  </div>
+  <%- include('../partials/ayuda-pagina', { pagina: 'solicitudes' }) %>
+
+  <div class="tarjeta">
+    <form method="get" action="/solicitudes" class="filtros">
+      <div class="campo"><label for="q">Buscar</label><input type="text" id="q" name="q" value="<%= q.q || '' %>" placeholder="Código o texto"></div>
+      <div class="campo"><label for="estado">Estado</label>
+        <select id="estado" name="estado"><option value="">Todos</option>
+          <% ESTADOS.forEach(([v, t]) => { %><option value="<%= v %>" <%= q.estado === v ? 'selected' : '' %>><%= t %></option><% }) %>
+        </select></div>
+      <div class="campo"><label for="categoria">Categoría</label>
+        <select id="categoria" name="categoria"><option value="">Todas</option>
+          <% categorias.forEach((c) => { %><option value="<%= c.id %>" <%= String(q.categoria) === String(c.id) ? 'selected' : '' %>><%= c.nombre %></option><% }) %>
+        </select></div>
+      <div class="campo"><label for="prioridad">Prioridad</label>
+        <select id="prioridad" name="prioridad"><option value="">Todas</option>
+          <% ['ALTA', 'MEDIA', 'BAJA'].forEach((p) => { %><option value="<%= p %>" <%= q.prioridad === p ? 'selected' : '' %>><%= etiquetaPrioridad(p) %></option><% }) %>
+        </select></div>
+      <% if (verFiltroResp) { %>
+      <div class="campo"><label for="responsable">Responsable</label>
+        <select id="responsable" name="responsable"><option value="">Todos</option>
+          <option value="sin" <%= q.responsable === 'sin' ? 'selected' : '' %>>Sin asignar</option>
+          <% funcionarios.forEach((f) => { %><option value="<%= f.id %>" <%= String(q.responsable) === String(f.id) ? 'selected' : '' %>><%= f.nombre %></option><% }) %>
+        </select></div>
+      <% } %>
+      <div class="campo"><label for="desde">Desde</label><input type="date" id="desde" name="desde" value="<%= q.desde || '' %>"></div>
+      <div class="campo"><label for="hasta">Hasta</label><input type="date" id="hasta" name="hasta" value="<%= q.hasta || '' %>"></div>
+      <div class="botones">
+        <button class="btn btn-sm" type="submit"><%- icono('buscar') %> Filtrar</button>
+        <% if (hayFiltros) { %><a class="btn btn-borde btn-sm" href="/solicitudes">Limpiar</a><% } %>
+      </div>
+    </form>
+
+    <% if (!solicitudes.length) { %>
+      <div class="vacio"><%- icono('bandeja') %><%= hayFiltros ? 'No hay solicitudes que coincidan con los filtros.' : 'Todavía no hay solicitudes.' %></div>
+    <% } else { %>
+    <p class="suave"><%= solicitudes.length %> resultado<%= solicitudes.length === 1 ? '' : 's' %></p>
+    <div class="tabla-caja">
+      <table class="tabla">
+        <thead><tr><th>Código</th><th>Fecha</th><% if (rol !== 'ESTUDIANTE') { %><th>Solicitante</th><% } %><th>Categoría</th><th>Descripción</th><th>Prioridad</th><th>Estado</th><% if (rol !== 'FUNCIONARIO') { %><th>Responsable</th><% } %><th></th></tr></thead>
+        <tbody>
+        <% solicitudes.forEach((s) => { %>
+          <tr>
+            <td class="codigo"><a href="/solicitudes/<%= s.id %>"><%= s.codigo %></a></td>
+            <td class="nowrap"><%= fecha(s.fechaRegistro) %></td>
+            <% if (rol !== 'ESTUDIANTE') { %><td><%= s.solicitante %></td><% } %>
+            <td><%= s.categoria %></td>
+            <td class="descripcion"><%= s.descripcion.length > 60 ? s.descripcion.slice(0, 60) + '…' : s.descripcion %></td>
+            <td><span class="badge <%= clasePrioridad(s.prioridad) %>"><%= etiquetaPrioridad(s.prioridad) %></span></td>
+            <td><span class="badge <%= claseEstado(s.estado.nombre) %>"><%= s.estado.etiqueta %></span></td>
+            <% if (rol !== 'FUNCIONARIO') { %><td><%= s.responsable || 'Sin asignar' %></td><% } %>
+            <td class="num"><a class="btn btn-borde btn-sm" href="/solicitudes/<%= s.id %>">Abrir</a></td>
+          </tr>
+        <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/footer') %>

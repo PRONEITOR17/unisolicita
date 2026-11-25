@@ -1,0 +1,32 @@
+<%- include('partials/header') %>
+<div class="contenedor pagina">
+  <div class="pagina-cabecera">
+    <div><span class="etiqueta-pill oscura">Perfil</span><h1>Mi cuenta</h1></div>
+    <a class="btn btn-borde" href="/panel">Volver al inicio</a>
+  </div>
+  <div class="grid-detalle">
+    <form class="tarjeta" method="post" action="/cuenta/contrasena" novalidate>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <h2>Cambiar contraseña</h2>
+      <% if (error) { %><div class="aviso aviso-error" role="alert"><%= error %></div><% } %>
+      <div class="campo"><label for="actual">Contraseña actual</label>
+        <input type="password" id="actual" name="actual" autocomplete="current-password" required></div>
+      <div class="campo"><label for="nueva">Contraseña nueva</label>
+        <input type="password" id="nueva" name="nueva" autocomplete="new-password" required>
+        <small>Mínimo 8 caracteres, con letras y números.</small></div>
+      <div class="campo"><label for="confirmar">Repite la contraseña nueva</label>
+        <input type="password" id="confirmar" name="confirmar" autocomplete="new-password" required></div>
+      <div class="botonera"><button class="btn btn-oro" type="submit"><%- icono('check') %> Guardar contraseña</button></div>
+    </form>
+    <aside class="tarjeta">
+      <h2>Tus datos</h2>
+      <dl class="datos">
+        <div><dt>Nombre</dt><dd><%= usuario.nombre %></dd></div>
+        <div><dt>Correo</dt><dd><%= usuario.correo %></dd></div>
+        <div><dt>Rol</dt><dd><%= etiquetaRol(usuario.rol) %></dd></div>
+      </dl>
+      <p class="suave">Si necesitas cambiar tu nombre, tu correo o tu rol, pídeselo a un administrador.</p>
+    </aside>
+  </div>
+</div>
+<%- include('partials/footer') %>

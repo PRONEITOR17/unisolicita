@@ -1,0 +1,13 @@
+<%
+  const ayudaAqui = locals.usuario ? ayudaPagina(usuario.rol, pagina) : null;
+%>
+<% if (ayudaAqui) { %>
+<details class="ayuda-pagina" data-ayuda="<%= pagina %>">
+  <summary><%- icono('ayuda') %> ¿Cómo funciona esta pantalla?</summary>
+  <div class="cuerpo">
+    <p><%= ayudaAqui.texto %></p>
+    <% if (ayudaAqui.pasos) { %><ol class="guia-pasos"><% ayudaAqui.pasos.forEach((p) => { %><li><%= p %></li><% }) %></ol><% } %>
+    <p class="mas"><a href="/ayuda">Ver la guía completa</a></p>
+  </div>
+</details>
+<% } %>

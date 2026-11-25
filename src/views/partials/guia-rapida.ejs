@@ -1,0 +1,17 @@
+<%
+  const pasosRapidos = guiaRapida(usuario.rol);
+%>
+<details class="guia-rapida" id="guia-rapida" open>
+  <summary><%- icono('ayuda') %> Guía rápida: cómo usar UniSolicita como <%= etiquetaRol(usuario.rol).toLowerCase() %></summary>
+  <div class="cuerpo">
+    <ol class="pasos-rapidos <%= pasosRapidos.length === 4 ? 'pasos-4' : '' %>">
+      <% pasosRapidos.forEach((p) => { %>
+      <li><strong><%= p.titulo %></strong><span><%= p.texto %></span></li>
+      <% }) %>
+    </ol>
+    <div class="acciones-guia">
+      <a class="btn btn-oro btn-sm" href="/panel?guia=1"><%- icono('ayuda') %> Hacer el recorrido guiado</a>
+      <a class="btn btn-borde btn-sm" href="/ayuda">Ver la guía completa</a>
+    </div>
+  </div>
+</details>

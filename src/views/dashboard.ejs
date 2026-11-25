@@ -1,0 +1,85 @@
+<%- include('partials/header') %>
+<%
+  const rol = usuario.rol;
+  const COLORES = { REGISTRADA: '#6b7a99', ASIGNADA: '#1da1d8', EN_PROCESO: '#f6b61c', RESUELTA: '#17b862', CERRADA: '#0b2a63', REABIERTA: '#f26b21', RECHAZADA: '#d6403a' };
+  const ETIQ = { REGISTRADA: 'Registradas', ASIGNADA: 'Asignadas', EN_PROCESO: 'En proceso', RESUELTA: 'Resueltas', CERRADA: 'Cerradas', REABIERTA: 'Reabiertas', RECHAZADA: 'Rechazadas' };
+  const SUBTITULO = {
+    ESTUDIANTE: 'Registra tus solicitudes y sigue su avance desde un solo lugar.',
+    FUNCIONARIO: 'Estas son las solicitudes que tienes asignadas para atender.',
+    ADMINISTRADOR: 'Asigna responsables, gestiona usuarios y vigila el flujo de solicitudes.',
+    SUPERVISOR: 'Consulta el estado general de las solicitudes y genera reportes.',
+  };
+  const primerNombre = usuario.nombre.split(' ')[0];
+%>
+<section class="hero hero-corto" data-marca="<%= etiquetaRol(rol).toUpperCase() %>">
+  <div class="contenedor">
+    <div>
+      <span class="etiqueta-pill">Panel de <%= etiquetaRol(rol).toLowerCase() %></span>
+      <h1>Hola, <em><%= primerNombre %></em></h1>
+      <p><%= SUBTITULO[rol] %></p>
+      <div class="acciones">
+        <% if (rol === 'ESTUDIANTE') { %>
+          <a class="btn btn-oro" href="/solicitudes/nueva"><%- icono('plus') %> Nueva solicitud</a>
+        <% } %>
+        <a class="btn btn-borde" href="/solicitudes">Ver solicitudes <%- icono('flecha') %></a>
+      </div>
+    </div>
+    <div class="estrella-caja">
+      <div class="estrella"><div><strong><%= abiertas %></strong><span><%= abiertas === 1 ? 'solicitud abierta' : 'solicitudes abiertas' %></span></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="rapidas">
+  <% if (rol === 'ESTUDIANTE') { %>
+    <a class="rapida" href="/solicitudes/nueva"><span class="circulo azul"><%- icono('plus') %></span><span><strong>Nueva solicitud</strong><small>Certificados, matrícula, apoyos y más.</small></span><span class="ir"><%- icono('flecha') %></span></a>
+    <a class="rapida" href="/solicitudes"><span class="circulo oro"><%- icono('doc') %></span><span><strong>Mis solicitudes</strong><small>Consulta el estado de cada trámite.</small></span><span class="ir"><%- icono('flecha') %></span></a>
+  <% } else if (rol === 'ADMINISTRADOR') { %>
+    <a class="rapida" href="/solicitudes?responsable=sin&estado=REGISTRADA"><span class="circulo azul"><%- icono('bandeja') %></span><span><strong>Por asignar</strong><small><%= sinAsignar %> solicitud<%= sinAsignar === 1 ? '' : 'es' %> esperando responsable.</small></span><span class="ir"><%- icono('flecha') %></span></a>
+    <a class="rapida" href="/usuarios"><span class="circulo oro"><%- icono('users') %></span><span><strong>Usuarios</strong><small>Altas, roles y desactivación.</small></span><span class="ir"><%- icono('flecha') %></span></a>
+  <% } else if (rol === 'FUNCIONARIO') { %>
+    <a class="rapida" href="/solicitudes?estado=ASIGNADA"><span class="circulo azul"><%- icono('bandeja') %></span><span><strong>Por iniciar</strong><small>Solicitudes asignadas sin atender.</small></span><span class="ir"><%- icono('flecha') %></span></a>
+    <a class="rapida" href="/solicitudes?estado=EN_PROCESO"><span class="circulo oro"><%- icono('reloj') %></span><span><strong>En proceso</strong><small>Las que estás atendiendo ahora.</small></span><span class="ir"><%- icono('flecha') %></span></a>
+  <% } else { %>
+    <a class="rapida" href="/solicitudes"><span class="circulo azul"><%- icono('doc') %></span><span><strong>Todas las solicitudes</strong><small>Consulta general, solo lectura.</small></span><span class="ir"><%- icono('flecha') %></span></a>
+    <a class="rapida" href="/reportes"><span class="circulo oro"><%- icono('chart') %></span><span><strong>Reportes</strong><small>Totales por estado, categoría y más.</small></span><span class="ir"><%- icono('flecha') %></span></a>
+  <% } %>
+  <a class="rapida" href="/notificaciones"><span class="circulo naranja"><%- icono('bell') %></span><span><strong>Notificaciones</strong><small><%= noLeidas %> sin leer.</small></span><span class="ir"><%- icono('flecha') %></span></a>
+</div>
+
+<div class="contenedor">
+  <h2>Resumen por estado <span class="suave ligero">· <%= total %> en total</span></h2>
+  <div class="contadores">
+    <% ordenEstados.forEach((e) => { %>
+      <a class="contador" data-color="<%= COLORES[e] %>" href="/solicitudes?estado=<%= e %>">
+        <strong><%= conteo[e] || 0 %></strong><span><%= ETIQ[e] %></span>
+      </a>
+    <% }) %>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Actividad reciente</h2>
+    <% if (!recientes.length) { %>
+      <div class="vacio"><%- icono('bandeja') %>Aún no hay solicitudes para mostrar.</div>
+    <% } else { %>
+    <div class="tabla-caja">
+      <table class="tabla">
+        <thead><tr><th>Código</th><th>Categoría</th><th>Descripción</th><th>Prioridad</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+          <% recientes.forEach((s) => { %>
+          <tr>
+            <td class="codigo"><a href="/solicitudes/<%= s.id %>"><%= s.codigo %></a></td>
+            <td><%= s.categoria %></td>
+            <td class="descripcion"><%= s.descripcion.length > 70 ? s.descripcion.slice(0, 70) + '…' : s.descripcion %></td>
+            <td><span class="badge <%= clasePrioridad(s.prioridad) %>"><%= etiquetaPrioridad(s.prioridad) %></span></td>
+            <td><span class="badge <%= claseEstado(s.estado.nombre) %>"><%= s.estado.etiqueta %></span></td>
+            <td class="num"><a class="btn btn-borde btn-sm" href="/solicitudes/<%= s.id %>">Ver</a></td>
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <% } %>
+  </div>
+</div>
+<%- include('partials/footer') %>
